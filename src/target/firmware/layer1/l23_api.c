@@ -321,6 +321,7 @@ static void l1ctl_rx_dm_rel_req(struct msgb *msg)
 	printd("L1CTL_DM_REL_REQ\n");
 	l1a_mftask_set(0);
 	l1s.dedicated.type = GSM_DCHAN_NONE;
+	l1s.dedicated.tn = 0;
 	l1a_txq_msgb_flush(&l1s.tx_queue[L1S_CHAN_MAIN]);
 	l1a_txq_msgb_flush(&l1s.tx_queue[L1S_CHAN_SACCH]);
 	l1a_txq_msgb_flush(&l1s.tx_queue[L1S_CHAN_TRAFFIC]);
@@ -436,6 +437,8 @@ static void l1ctl_rx_reset_req(struct msgb *msg)
 		l1s_reset();
 		l1s_reset_hw();
 		audio_set_enabled(GSM48_CMODE_SIGN, 0);
+		l1s.dedicated.type = GSM_DCHAN_NONE;
+		l1s.dedicated.tn = 0;
 		l1ctl_tx_reset(L1CTL_RESET_CONF, reset_req->type);
 		break;
 	case L1CTL_RES_T_SCHED:

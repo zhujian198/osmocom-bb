@@ -67,12 +67,24 @@ static const uint16_t tx_burst_duration[_NUM_L1_TXWIN] = {
 	[L1_TXWIN_AB]	= L1_TX_AB_DURATION_Q,
 };
 
+static int last_ts = 0;
 
 static int _win_setup(__unused uint8_t p1, __unused uint8_t p2, __unused uint16_t p3)
 {
 	uint8_t tn;
 
 	rfch_get_params(&l1s.next_time, NULL, NULL, &tn);
+
+	/* TS change compensation */
+	if (tn < last_ts) {
+		printf("TS Chg back: %d -> %d\n", last_ts, tn);
+
+		puts("ADV !\n");
+		l1s.current_time = l1s.next_time;
+		l1s_time_inc(&l1s.next_time, 1);
+	} else if (tn > last_ts)
+		printf("TS Chg forth: %d -> %d\n", last_ts, tn);
+	last_ts = tn;
 
 	l1s.tpu_offset = (5000 + l1s.tpu_offset + l1s.tpu_offset_correction) % 5000;
 	l1s.tpu_offset_correction = 0;
