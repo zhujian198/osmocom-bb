@@ -132,7 +132,7 @@ static uint8_t rach_to_t3_comb[27] = {
 	25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36,
 	45, 46};
 
-/* request a RACH request at the next multiframe T3 = fn51 */
+/* schedule access burst */
 void l1a_rach_req(uint16_t offset, uint8_t combined, uint8_t ra)
 {
 	uint32_t fn_sched;
@@ -141,7 +141,12 @@ void l1a_rach_req(uint16_t offset, uint8_t combined, uint8_t ra)
 	offset += 3;
 
 	local_firq_save(flags);
-	if (combined) {
+	if (l1s.dedicated.type == GSM_DCHAN_TCH_F) {
+		fn_sched = l1s.current_time.fn + offset;
+		/* only hit TCH frame */
+		if ((fn_sched % 13) == 12)
+			fn_sched++;
+	} else if (combined) {
 		/* add elapsed RACH slots to offset */
 		offset += t3_to_rach_comb[l1s.current_time.t3];
 		/* offset is the number of RACH slots in the future */
@@ -151,6 +156,7 @@ void l1a_rach_req(uint16_t offset, uint8_t combined, uint8_t ra)
 	} else
 		fn_sched = l1s.current_time.fn + offset;
 	l1s.rach.ra = ra;
+	fn_sched %= 2715648;
 	sched_gsmtime(rach_sched_set_ul, fn_sched, 0);
 	local_irq_restore(flags);
 
