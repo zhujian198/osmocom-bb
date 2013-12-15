@@ -504,8 +504,6 @@ static void gsm322_unselect_cell(struct gsm322_cellsel *cs)
 	LOGP(DCS, LOGL_INFO, "Unselecting serving cell.\n");
 
 	cs->selected = 0;
-	if (cs->si)
-		cs->si->si5 = 0; /* unset SI5* */
 	cs->si = NULL;
 	memset(&cs->sel_si, 0, sizeof(cs->sel_si));
 	cs->sel_mcc = cs->sel_mnc = cs->sel_lac = cs->sel_id = 0;
